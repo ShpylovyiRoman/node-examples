@@ -1,7 +1,11 @@
 'use strict';
 
-console.log('Hello world!');
+const fs = require('fs');
+const translate = require('google-translate-api');
 
-const a = (x, y) => x+y;
-
-console.log(a(5,6));
+const eng = fs.readFileSync('/home/aezakmi/eng.txt', 'utf8');
+console.log(eng);
+//not working...
+translate('Hello world', { from: 'en', to: 'uk' })
+  .then(ru => { console.log(ru.text); })
+  .catch(err => { console.error(err); });
