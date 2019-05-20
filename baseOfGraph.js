@@ -23,7 +23,6 @@ function getRandom(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-
 //Function that puts zeros diagonally
 function zeroDiagonal(matrix) {
   const newMatrix = matrix;
@@ -39,7 +38,6 @@ function zeroDiagonal(matrix) {
   return newMatrix;
 }
 
-
 //Function that creates matrix filled 0
 function zerosMatrix(dimensionOfMatrix) {
   const zeroMatrix = [];
@@ -53,7 +51,6 @@ function zerosMatrix(dimensionOfMatrix) {
   return zeroMatrix;
 }
 
-
 //Function that change all numbers, expect 0, to 1
 function toOnesMatrix(baseMatrix) {
   for (let i = 0; i < baseMatrix[0].length; i++) {
@@ -66,15 +63,14 @@ function toOnesMatrix(baseMatrix) {
   return baseMatrix;
 }
 
-
 //Function that find minimal way to next node
 function minSelect(weightMatr, currentMatrix, currentNode, passedNodes) {
   let nextNode;
   const baseMatrix = currentMatrix;
   let minValue = Infinity;
-  for (let i = 0; i < (weightMatr[0].length); i++) {
+  for (let i = 0; i < weightMatr[0].length; i++) {
     if (passedNodes[i] !== 1) {
-      if ((weightMatr[currentNode][i]) < minValue) {
+      if (weightMatr[currentNode][i] < minValue) {
         minValue = weightMatr[currentNode][i];
         baseMatrix[currentNode] = new Array(weightMatr[0].length).fill(0);
         baseMatrix[currentNode][i] = minValue;
@@ -85,27 +81,37 @@ function minSelect(weightMatr, currentMatrix, currentNode, passedNodes) {
   return [baseMatrix, nextNode];
 }
 
-
 //Main function to find base of graph
 function baseGraphFinder(weightMatrix, startNode) {
   let baseMatrix = zerosMatrix(weightMatrix[0].length);
   const passedNodes = [];
   let currentNode = startNode;
 
-  for (let i = 1; i < (weightMatrix[0].length); i++) {
-    [baseMatrix, ] = minSelect(weightMatrix, baseMatrix, currentNode, passedNodes);
+  for (let i = 1; i < weightMatrix[0].length; i++) {
+    [baseMatrix] = minSelect(
+      weightMatrix,
+      baseMatrix,
+      currentNode,
+      passedNodes
+    );
     passedNodes[currentNode] = 1;
-    [, currentNode] = minSelect(weightMatrix, baseMatrix, currentNode, passedNodes);
+    [, currentNode] = minSelect(
+      weightMatrix,
+      baseMatrix,
+      currentNode,
+      passedNodes
+    );
   }
   baseMatrix = toOnesMatrix(baseMatrix);
   return baseMatrix;
 }
 
-
 //Usage
 
 //input dimension of matrix and start node
-const dimensionOfMatrix = readlineSync.question('How many nodes your graph will have? \n');
+const dimensionOfMatrix = readlineSync.question(
+  'How many nodes your graph will have? \n'
+);
 const startNode = getRandom(0, dimensionOfMatrix);
 
 //Set matrix of weighted graph
