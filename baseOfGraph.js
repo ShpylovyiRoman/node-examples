@@ -15,6 +15,7 @@ function getRandomSquareMatrix(dimensionOfMatrix) {
     matrix.push(row);
   }
   matrix = zeroDiagonal(matrix);
+  matrix = symetric(matrix);
   return matrix;
 }
 
@@ -42,14 +43,12 @@ function zeroDiagonal(matrix) {
 function zerosMatrix(dimensionOfMatrix) {
   const zeroMatrix = [];
   for (let i = 0; i < dimensionOfMatrix; i++) {
-    const row = [];
-    for (let j = 0; j < dimensionOfMatrix; j++) {
-      row.push(0);
-    }
+    let row = new Array(dimensionOfMatrix).fill(0);
     zeroMatrix.push(row);
   }
   return zeroMatrix;
 }
+
 
 //Function that change all numbers, expect 0, to 1
 function toOnesMatrix(baseMatrix) {
@@ -63,64 +62,104 @@ function toOnesMatrix(baseMatrix) {
   return baseMatrix;
 }
 
-//Function that find minimal way to next node
-function minSelect(weightMatr, currentMatrix, currentNode, passedNodes) {
-  let nextNode;
-  const baseMatrix = currentMatrix;
-  let minValue = Infinity;
-  for (let i = 0; i < weightMatr[0].length; i++) {
-    if (passedNodes[i] !== 1) {
-      if (weightMatr[currentNode][i] < minValue) {
-        minValue = weightMatr[currentNode][i];
-        baseMatrix[currentNode] = new Array(weightMatr[0].length).fill(0);
-        baseMatrix[currentNode][i] = minValue;
-        nextNode = i;
+//Function that make symetric matrix
+function symetric(inputMatrix){
+  let symetricMatrix = inputMatrix;
+  for (let i = 0; i < symetricMatrix[0].length; i++) {
+    for (let j = 0; j < symetricMatrix[0].length; j++) {
+      if (symetricMatrix[i][j] !== symetricMatrix[j][i]) {
+        symetricMatrix[i][j] = symetricMatrix[j][i];
       }
     }
   }
-  return [baseMatrix, nextNode];
+  return symetricMatrix
 }
 
-//Main function to find base of graph
-function baseGraphFinder(weightMatrix, startNode) {
-  let baseMatrix = zerosMatrix(weightMatrix[0].length);
-  const passedNodes = [];
-  let currentNode = startNode;
 
-  for (let i = 1; i < weightMatrix[0].length; i++) {
-    [baseMatrix] = minSelect(
-      weightMatrix,
-      baseMatrix,
-      currentNode,
-      passedNodes
-    );
-    passedNodes[currentNode] = 1;
-    [, currentNode] = minSelect(
-      weightMatrix,
-      baseMatrix,
-      currentNode,
-      passedNodes
-    );
+//creating class of edges
+class Edge {
+  constructor(start, end, weight) {
+    this.start = start;
+    this.end = end;
+    this.weight = weight;
   }
-  baseMatrix = toOnesMatrix(baseMatrix);
+}
+
+
+//Factory that creates edges by weight matrix
+function EdgesFactory(matrixGraph){
+let edges=[];
+for (let i=1; i<=(matrixGraph[0].length); i++){
+  let line = matrixGraph[i-1];
+  for (let j=1; j<=(matrixGraph[0].length); j++){
+    let line = matrixGraph[i-1];
+    let weight = line[j-1];
+    if (weight !== 0){
+      let value=new Edge(i-1, j-1, weight);
+      edges.push(value);
+      }
+    }
+  }
+  return edges
+}
+
+//Function for sort by weight
+function compareWeight(edgeA, edgeB) {
+  return edgeA.weight - edgeB.weight;
+}
+
+
+//Main function in Kraskal algorithm
+function KraskalBaseBuilder(edges, matrixSize){
+  let baseMatrix = zerosMatrix(matrixSize);
+  let passedNodes = {};
+  while (Object.keys(passedNodes).length < matrixSize){
+  edges = edges.filter(function () { return true });
+    let edge = edges.shift();
+    let start = edge.start;
+    let end = edge.end;
+    let row = baseMatrix[start];
+    row[edge.end]=1;
+    baseMatrix[start]=row;
+    passedNodes[start]=1;
+    passedNodes[end]=1;
+    baseMatrix[start]=row;
+    for (let i=0; i<edges.length; i++){
+      let currentEdge = edges[i];
+      let currentStart = currentEdge.start;
+      let currentEnd = currentEdge.end;
+      if (passedNodes[currentStart]===1 && passedNodes[currentEnd] ===1){
+        delete  edges[i]
+      }
+    }
+  }
   return baseMatrix;
 }
 
-//Usage
 
-//input dimension of matrix and start node
+//Realization Kraskal algoritm
+function KraskalAlgorithm(weightMatrix){
+    let matrixSize = weightMatrix[0].length;
+//Create edges
+    const edges=EdgesFactory(weightMatrix)
+//Sort edges by weight
+  edges.sort(compareWeight)
+//Find base of graph
+  let baseMatrix = KraskalBaseBuilder(edges, matrixSize)
+  return baseMatrix
+}
+
+
+//Usage
 const dimensionOfMatrix = readlineSync.question(
   'How many nodes your graph will have? \n'
 );
-const startNode = getRandom(0, dimensionOfMatrix);
 
-//Set matrix of weighted graph
 const matrixGraph = getRandomSquareMatrix(dimensionOfMatrix);
 
-//Output of weighted graph
-console.log('\nMatrix of weighted graph: ');
-console.log(matrixGraph);
 
-console.log('\nStart node is : ' + startNode + '\n');
 
-console.log(baseGraphFinder(matrixGraph, startNode));
+
+const A = KraskalAlgorithm(matrixGraph);
+console.log(matrixGraph)
+console.log(A)
