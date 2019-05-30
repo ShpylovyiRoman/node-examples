@@ -3,6 +3,19 @@
 //connect  input module
 const readlineSync = require('readline-sync');
 
+//input validation function
+function inputDataChecker() {
+  let inputNumber = readlineSync.question(
+    'How many nodes your graph will have? \n'
+  );
+  inputNumber = Number(inputNumber);
+  if (typeof inputNumber === 'number' && inputNumber > 1) return inputNumber;
+  else {
+    console.log('Invalid input, please enter number above one. ');
+    return inputDataChecker();
+  }
+}
+
 //Getting a matrix with random data
 function getRandomSquareMatrix(dimensionOfMatrix) {
   let matrix = [];
@@ -131,13 +144,56 @@ function algorithmKraskal(weightMatrix) {
   return baseMatrix;
 }
 
+//Function for finding lead time
+function timeTester(matrix) {
+  const start = new Date().getTime();
+  const baseOfGraph = algorithmKraskal(matrix);
+  const end = new Date().getTime();
+
+  const runningTime = end - start;
+  return [baseOfGraph, runningTime];
+}
+
 //Usage
-const dimensionOfMatrix = readlineSync.question(
-  'How many nodes your graph will have? \n'
-);
+const dimensionMatrix = inputDataChecker();
+const dimensionBigMatrix = dimensionMatrix * 2;
 
-const matrixGraph = getRandomSquareMatrix(dimensionOfMatrix);
+const matrixGraph = getRandomSquareMatrix(dimensionMatrix);
+const secondMatrix = getRandomSquareMatrix(dimensionMatrix);
+const bigMatrixGraph = getRandomSquareMatrix(dimensionBigMatrix);
+const bigMatrixSecondGraph = getRandomSquareMatrix(dimensionBigMatrix);
 
-const A = algorithmKraskal(matrixGraph);
-console.log(matrixGraph);
-console.log(A);
+// console.log('First matrix: \n')
+// console.log(firstMatrixGraph);
+// console.log('Second matrix: \n')
+// console.log(secondMatrix);
+// console.log('First big matrix: \n')
+// console.log(bigMatrixGraph);
+// console.log('Second big matrix: \n')
+// console.log(bigMatrixSecondGraph);
+
+//Finding lead time
+let baseMatrix,
+    firstTime,
+    secondBaseMatrix,
+    secondTime,
+    bigBaseMatrix,
+    bigMatrixTime,
+    secondBaseBigMatrix,
+    bigMatrixSecondTime;
+
+[baseMatrix, firstTime] = timeTester(matrixGraph);
+// console.log(baseMatrix);
+console.log(`Running time for first graph: ${firstTime}ms`);
+
+[secondBaseMatrix, secondTime] = timeTester(secondMatrix);
+// console.log(secondBaseMatrix);
+console.log(`Running time for second graph: ${secondTime}ms`);
+
+[bigBaseMatrix, bigMatrixTime] = timeTester(bigMatrixGraph);
+// console.log(bigBaseMatrix);
+console.log(`Running time for big graph: ${bigMatrixTime}ms`);
+
+[secondBaseBigMatrix, bigMatrixSecondTime] = timeTester(bigMatrixSecondGraph);
+// console.log(secondBaseBigMatrix);
+console.log(`Running time for second big graph: ${bigMatrixSecondTime}ms`);
